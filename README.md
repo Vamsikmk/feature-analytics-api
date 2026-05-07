@@ -416,7 +416,7 @@ Real-world example: A SyncUp Drive tracker generates 30 events during a commute.
 - T-Mobile controls the client apps — duplicate submission is rare and bounded
 - A small error rate is acknowledged and treated as an acceptable buffer
 
-**Production fix — two IDs, two purposes:**
+**Production — two IDs, two purposes:**
 
 **1. `event_id` (client-generated UUID) — for deduplication and idempotency:**
 ```json
