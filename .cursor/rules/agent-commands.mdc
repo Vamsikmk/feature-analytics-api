@@ -1,0 +1,48 @@
+---
+description: Custom agent slash commands. Recognizes /mrreviewer, /develop, and /build commands and maps them to the correct skill workflow automatically.
+alwaysApply: true
+---
+
+# Agent Commands
+
+When the user types any of the commands below, immediately read the corresponding skill file and follow its instructions. Do not ask for clarification — execute the workflow.
+
+---
+
+## `/mrreviewer <PR-number-or-URL>`
+
+Accepts any of these formats:
+- `/mrreviewer 42` — PR number (run inside the repo)
+- `/mrreviewer https://github.com/owner/repo/pull/42` — full GitHub PR URL
+- `/mrreviewer https://gitlab.com/org/repo/-/merge_requests/12` — full GitLab MR URL
+- `/mrreviewer feature/my-branch` — branch name
+
+Read and execute: `C:\Users\vamsi\.cursor\skills\review-mr\SKILL.md`
+
+Extract the number and repo from whatever format the user provides. Pass both to Step 1.
+
+---
+
+## `/develop <ticket-id>`
+
+**Example:** `/develop 123` or `/develop PROJ-456` or `/develop #78`
+
+Read and execute: `C:\Users\vamsi\.cursor\skills\develop-from-ticket\SKILL.md`
+
+Pass the provided ticket ID in Step 1 to determine ticket type and fetch requirements.
+
+---
+
+## `/build`
+
+**Example:** `/build` or `/build feature-analytics-api`
+
+Read and execute: `C:\Users\vamsi\.cursor\skills\build-feature-analytics-api\SKILL.md`
+
+Start from Step 1 and build the full project in the current directory.
+
+---
+
+## `/skills`
+
+List all available commands with a one-line description of each.
