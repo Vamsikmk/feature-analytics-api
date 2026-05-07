@@ -129,6 +129,53 @@ pytest --cov=app --cov-report=term-missing      # with coverage
 
 ---
 
+### API Smoke Test / Load Testing
+
+A smoke test script is included to hit the live API with realistic payloads and measure real response times, validate edge cases, and confirm rate limiting is working correctly.
+
+**Make sure the server is running first**, then:
+
+```bash
+# Run all modes (single events + batch + validation checks)
+python -m scripts.api_test
+
+# 200 single events — measures latency under load
+python -m scripts.api_test --mode single --count 200
+
+# Batch mode — 10 batches of 100 events each
+python -m scripts.api_test --mode batch
+
+# Validation only — tests bad payloads return correct error codes
+python -m scripts.api_test --mode validate
+
+# Test against Docker container or remote URL
+python -m scripts.api_test --url http://localhost:8000 --mode all
+```
+
+**What the script tests:**
+- `POST /events` single and batch ingestion at volume
+- Latency metrics — avg, p50, p95, max response times
+- Rate limiting — confirms `429` triggers correctly under burst traffic
+- Validation — confirms bad payloads (missing fields, oversized metadata, wrong types) return `422`
+
+**Example output:**
+```
+Health check: OK
+
+--- Single Event Mode (100 requests) ---
+  Total success : 100 | Total failed: 0
+  Avg latency   : 67ms | p50: 63ms | p95: 79ms | Max: 407ms
+
+--- Validation Check ---
+  PASS | Missing timestamp        | expected=422 got=422
+  PASS | Empty user_id            | expected=422 got=422
+  PASS | Metadata as list         | expected=422 got=422
+  PASS | Metadata too large       | expected=422 got=422
+  PASS | Valid single event       | expected=201 got=201
+```
+
+---
+
 ### API Reference
 
 #### POST /events — Ingest Events
