@@ -125,6 +125,25 @@ I kept the union approach (`EventIn | EventBatch`) because the requirement expli
 
 ---
 
+## Interaction 7 — Building Reusable Agent Skills
+
+**What I did:**
+After completing the project, I went a step further and built two reusable Cursor agent skills directly inside the repository:
+
+- `.cursor/skills/develop-from-ticket/` — a full ticket-driven development workflow: fetches requirements from GitHub Issues, Jira, or Linear; plans implementation with todos; develops the feature; writes tests; checks coverage; and produces a review report
+- `.cursor/skills/review-mr/` — a full MR/PR review workflow: fetches the diff via `gh pr diff`, runs tests and coverage, auto-scans for debug code / secrets / SQL injection / timezone bugs, and produces a structured `[MUST]` / `[SHOULD]` / `[NIT]` review report
+- `.cursor/rules/agent-commands.mdc` — registers `/mrreviewer <PR-url>`, `/develop <ticket-id>`, and `/build` as agent slash commands so any developer who clones the repo can trigger these workflows instantly
+
+**Why I built this:**
+The interviewer mentioned during the discussion that building a skill for log analysis or debugging automation would be "really awesome" to see. I took that further — rather than a one-off script, I built reusable agent workflows that any engineer on the team could use. The skills are version-controlled alongside the code, so they travel with the repo.
+
+**My judgment:**
+- I kept the skills generic (not hardcoded to this specific project) so they work on any codebase — the `develop-from-ticket` skill detects GitHub vs Jira vs Linear automatically
+- I added `CRITERIA.md` and `REVIEW.md` as separate reference files so the main `SKILL.md` stays under 250 lines and loads efficiently in the agent context
+- I chose to commit these under `.cursor/` rather than `scripts/` — this is the correct Cursor convention for agent-readable workflows and signals familiarity with the tooling ecosystem
+
+---
+
 ## Overall Reflection
 
 **Where AI saved the most time:**
