@@ -408,28 +408,48 @@ Real-world example: A SyncUp Drive tracker generates 30 events during a commute.
 
 ---
 
-### 6. Duplicate Events — Not Handled in MVP
+### 6. Duplicate Events, Idempotency & Transaction Tracking — Not Handled in MVP
 
-**Current state:** Duplicates are inserted as separate rows. The same event sent twice counts twice in analytics.
+**Current state:** No event ID. Duplicates are inserted as separate rows. The same event sent twice counts twice in analytics. There is no way to trace a specific event after ingestion.
 
 **Why acceptable for MVP:**
 - T-Mobile controls the client apps — duplicate submission is rare and bounded
-- The interviewer noted: *"there will be some error rate always — we keep it as a buffer"*
+- A small error rate is acknowledged and treated as an acceptable buffer
 
-**Production fix — `event_id` deduplication:**
+**Production fix — two IDs, two purposes:**
+
+**1. `event_id` (client-generated UUID) — for deduplication and idempotency:**
 ```json
 {
   "event_id": "uuid-abc-123",
-  "timestamp": "...",
-  "user_id": "...",
-  "feature": "..."
+  "timestamp": "2025-01-01T12:00:00Z",
+  "user_id": "user-123",
+  "feature": "sidebar_search"
 }
 ```
 ```sql
 INSERT INTO events (...) VALUES (...)
 ON CONFLICT (event_id) DO NOTHING
 ```
-Same event sent twice → second insert silently ignored. Idempotent ingestion.
+Same event retried after a network drop → second insert silently ignored. Fully idempotent.
+
+**2. `ingestion_id` (server-generated) — for transaction tracking and auditability:**
+
+The server generates its own receipt ID and returns it in the response:
+```json
+{
+  "ingested": 1,
+  "ingestion_id": "srv-20250101-xyz789",
+  "message": "Successfully ingested 1 event(s)"
+}
+```
+
+**Why transaction tracking matters in production:**
+- Client can confirm a specific batch was received — no ambiguity
+- Supports auditability — every ingestion is traceable end to end
+- Enables support workflows: *"Event ID uuid-abc-123 — did it arrive?"* → look up by `event_id`
+- Debugging inflated analytics: trace which ingestion batch introduced unexpected data
+- Good practice for any write-heavy API — every transaction should have a receipt
 
 ---
 
