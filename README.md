@@ -13,7 +13,7 @@ A REST API for ingesting and analyzing feature usage events. Built with **FastAP
 | **Ingestion** | `POST /events` — accepts a single event or a batch of up to 1,000 events |
 | **Analytics** | 4 query endpoints: usage count, unique users, top-N features, metadata breakdown |
 | **Caching** | In-memory TTL cache (60s) — invalidated on every write |
-| **Rate limiting** | Per-IP limits via `slowapi` — 60/min on ingestion, 30/min on analytics |
+| **Rate limiting** | Per-IP limits via `slowapi` — 100/min on ingestion, 30/min on analytics |
 | **Request logging** | Structured logs for every request (method, path, status, latency) |
 | **Response headers** | `X-Response-Time-Ms` on every response |
 | **CORS** | Open CORS for development (`allow_origins=["*"]`) |
@@ -310,7 +310,7 @@ curl http://localhost:8000/health
 
 | Endpoint | Limit |
 |---|---|
-| `POST /events` | 60 / minute |
+| `POST /events` | 100 / minute |
 | `GET /analytics/*` | 30 / minute |
 | `GET /health` | 60 / minute |
 | `POST /seed` | 5 / minute |
